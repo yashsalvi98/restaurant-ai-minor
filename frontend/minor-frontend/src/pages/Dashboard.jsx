@@ -62,164 +62,106 @@ function Dashboard() {
 
   return (
     <div className="page">
-      <h1 className="page-title">AI Restaurant Dashboard</h1>
+      <h1 className="page-title">Dashboard</h1>
       <p className="page-subtitle">
-        High-level overview powered by demand forecasting, menu insights and stock planning.
+        Overview of forecasted demand and inventory requirements.
       </p>
 
-      {/* Controls */}
-      <div className="card" style={{ marginBottom: "1.5rem" }}>
-        <h3>Filters</h3>
-        <p className="card-note" style={{ marginBottom: "0.5rem" }}>
-          Choose a day of week and month. All cards below will use the same inputs.
-        </p>
-        <div
-          className="form-row"
-          style={{ marginTop: "0.5rem", gap: "0.75rem", flexWrap: "wrap" }}
-        >
-          <label className="label">
-            Day of week (0 = Mon, 6 = Sun):
-          </label>
-          <input
-            type="number"
-            min="0"
-            max="6"
-            value={day}
-            onChange={(e) => setDay(Number(e.target.value))}
-            className="input"
-          />
+      {/* Configuration */}
+      <div className="card" style={{ marginBottom: "2rem" }}>
+        <h3>Report Parameters</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label className="label">Day of Week</label>
+            <input
+              type="number"
+              min="0"
+              max="6"
+              value={day}
+              onChange={(e) => setDay(Number(e.target.value))}
+              className="input"
+            />
+          </div>
 
-          <label className="label">
-            Month (1–12):
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="12"
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            className="input"
-          />
+          <div className="form-group">
+            <label className="label">Month</label>
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={month}
+              onChange={(e) => setMonth(Number(e.target.value))}
+              className="input"
+            />
+          </div>
 
           <button
             className="btn"
             onClick={handleRefresh}
             disabled={loading}
           >
-            {loading ? "Loading..." : "Refresh Dashboard"}
+            {loading ? "Updating..." : "Generate Report"}
           </button>
         </div>
-
-        {error && (
-          <p className="card-note" style={{ marginTop: "0.5rem", color: "red" }}>
-            {error}
-          </p>
-        )}
       </div>
 
-      {/* Summary Cards */}
+      {/* Key Metrics */}
       <div
-        className="card"
         style={{
-          marginBottom: "1.5rem",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "1rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1.5rem",
+          marginBottom: "2rem"
         }}
       >
-        {/* Card 1: Total forecast */}
-        <div className="card" style={{ marginBottom: 0 }}>
-          <h3>Forecasted Orders</h3>
+        <div className="card">
+          <h3>Total Forecasted Orders</h3>
           {forecast ? (
-            <div style={{ marginTop: "0.5rem" }}>
-              <p className="card-note">
-                Day {forecast.day_of_week}, Month {forecast.month}
-              </p>
-              <p style={{ fontSize: "1.8rem", fontWeight: "bold" }}>
-                {forecast.predicted_quantity.toFixed(2)}
-              </p>
-              <p className="card-note">
-                Approx. total orders expected for the day.
-              </p>
+            <div>
+              <div className="card-number">{forecast.predicted_quantity.toFixed(0)}</div>
+              <p className="card-note">Expected for the selected period</p>
             </div>
           ) : (
-            <p className="card-note" style={{ marginTop: "0.5rem" }}>
-              No data yet. Click &quot;Refresh Dashboard&quot;.
-            </p>
+            <p className="card-note">No data generated</p>
           )}
         </div>
 
-        {/* Card 2: Top item */}
-        <div className="card" style={{ marginBottom: 0 }}>
-          <h3>Top Item by Demand</h3>
+        <div className="card">
+          <h3>Top Item Demand</h3>
           {topItem ? (
-            <div style={{ marginTop: "0.5rem" }}>
-              <p className="card-note">
-                Based on item-wise ML prediction.
-              </p>
-              <p style={{ fontSize: "1.4rem", fontWeight: "bold" }}>
-                {topItem.name}
-              </p>
-              <p className="card-note">
-                Predicted:{" "}
-                <strong>{topItem.value.toFixed(1)} orders</strong>
-              </p>
+            <div>
+              <div className="card-number" style={{ fontSize: "1.5rem" }}>{topItem.name}</div>
+              <p className="card-note">{topItem.value.toFixed(0)} units projected</p>
             </div>
           ) : (
-            <p className="card-note" style={{ marginTop: "0.5rem" }}>
-              No item predictions yet.
-            </p>
+            <p className="card-note">No data generated</p>
           )}
         </div>
 
-        {/* Card 3: Shortages */}
-        <div className="card" style={{ marginBottom: 0 }}>
-          <h3>Ingredients in Shortage</h3>
+        <div className="card">
+          <h3>Stock Shortages</h3>
           {stockShortages.length > 0 ? (
-            <div style={{ marginTop: "0.5rem" }}>
-              <p style={{ fontSize: "1.8rem", fontWeight: "bold" }}>
+            <div>
+              <div className="card-number" style={{ color: "var(--accent-red)" }}>
                 {stockShortages.length}
-              </p>
-              <p className="card-note">
-                Ingredients where current stock is below required total.
-              </p>
-              <ul className="card-list" style={{ marginTop: "0.5rem" }}>
-                {stockShortages.slice(0, 3).map((row) => (
-                  <li key={row.ingredient_id}>
-                    {row.ingredient_name} – need{" "}
-                    {row.need_to_buy.toFixed(2)} {row.unit}
-                  </li>
-                ))}
-                {stockShortages.length > 3 && (
-                  <li>+ more… see full table on Stock page.</li>
-                )}
-              </ul>
+              </div>
+              <p className="card-note">Items require replenishment</p>
             </div>
           ) : (
-            <p className="card-note" style={{ marginTop: "0.5rem" }}>
-              No shortages detected for this day & month.
-            </p>
+            <div>
+              <div className="card-number" style={{ color: "var(--accent-green)" }}>0</div>
+              <p className="card-note">All stock levels optimized</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Optional: small explanation card */}
-      <div className="card">
-        <h3>How this Dashboard Works</h3>
-        <ul className="card-list">
-          <li>
-            <strong>Forecasted Orders</strong> uses the total-demand XGBoost model
-            trained on real restaurant sales data.
-          </li>
-          <li>
-            <strong>Top Item by Demand</strong> comes from the item-wise XGBoost
-            model, predicting popularity for each menu item.
-          </li>
-          <li>
-            <strong>Ingredients in Shortage</strong> are calculated by combining
-            item predictions with recipe mappings and current stock from the DB.
-          </li>
-        </ul>
+      <div className="card" style={{ background: "#f8fafc" }}>
+        <h3>System Status</h3>
+        <p className="card-note">
+          Demand models are currently operating on XGBoost v3.1.2. Forecast accuracy is calculated based on 
+          historical sales trends from the connected database.
+        </p>
       </div>
     </div>
   );
